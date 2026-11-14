@@ -99,6 +99,47 @@ a{color:var(--ac)}
 .kp{display:grid;grid-template-columns:repeat(3,72px);gap:12px;justify-content:center}
 .kp button{height:64px;border-radius:50%;border:0;background:var(--card);font-size:24px;font-weight:600;cursor:pointer;border:1px solid var(--line)}
 .tot{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;border-radius:14px;padding:10px 14px;margin-top:12px}.tot b{display:block;font-size:20px}.tot .xs.mut,.tot .mut{color:#cdbfcc}.prow,.prow2{display:grid;grid-template-columns:1fr 92px 82px;gap:8px;align-items:center;padding:6px 0}.prow2{grid-template-columns:1fr 110px}.prow input,.prow2 input{padding:8px 10px}.nw{white-space:nowrap}.phs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.phs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:pointer;border:1px solid var(--line)}.phs span{grid-column:1/-1}
+.sb-top{display:none}
+@media(min-width:600px){
+body{padding-bottom:24px;padding-left:88px}
+nav{top:0;bottom:0;left:0;right:auto;width:88px;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;padding:18px 8px;border-top:0;border-right:1px solid var(--line);overflow-y:auto;background:#fff}
+nav button{min-width:0;padding:10px 4px;border-radius:12px}
+nav button.on{background:var(--ac2)}
+#fab{bottom:28px;right:28px}
+#app{max-width:780px;padding:24px 24px 30px}
+.toast{bottom:40px}
+}
+@media(min-width:900px){
+body{padding-left:250px}
+nav{width:250px;padding:20px 14px;gap:2px}
+nav button{flex-direction:row;justify-content:flex-start;gap:12px;font-size:15px;padding:11px 14px}
+nav button svg{width:21px;height:21px}
+.sb-top{display:block;margin-bottom:14px}
+.sb-brand{display:flex;gap:10px;align-items:center;margin:0 4px 16px}.sb-brand img{width:42px;height:42px;border-radius:12px}.sb-brand b{display:block;font-family:Fraunces,Georgia,serif;font-size:19px;line-height:1.1}.sb-brand span{font-size:12.5px;color:var(--mut)}
+#fab{display:none}
+#app{max-width:1200px;padding:30px 36px 40px}
+#ov{align-items:stretch;justify-content:flex-end}
+#sheet{max-width:500px;max-height:none;height:100vh;border-radius:24px 0 0 24px;animation:side .22s ease;padding:26px 24px}
+@keyframes side{from{transform:translateX(40px);opacity:0}}
+.grip{display:none}
+.kpi b{font-size:22px}
+}
+@media(min-width:1000px){
+.dash{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.grid2>.card{margin:0}
+}
+.ag{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.ag-h,.ag-b{display:grid;gap:8px}
+.ag-h{position:sticky;top:0;background:#fff;z-index:2;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.ag-h div{font-weight:700;font-size:14px}.ag-h small{display:block;font-weight:500;color:var(--mut);font-size:12px}
+.ag-b{position:relative;margin-top:8px}
+.ag-t{position:relative}.ag-t span{position:absolute;right:4px;font-size:11.5px;color:var(--mut);transform:translateY(-50%)}
+.ag-c{position:relative;border-radius:12px;background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px var(--hh));background-color:#fdfaf8;cursor:copy}
+.ag-c:hover{background-color:#fcf6f8}
+.ag-a{position:absolute;left:4px;right:4px;border-radius:10px;padding:5px 8px;font-size:12.5px;line-height:1.25;overflow:hidden;cursor:pointer;background:color-mix(in srgb,var(--pc) 16%,#fff);border-left:4px solid var(--pc);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.ag-a b{display:block;font-size:13px}.ag-a span{color:var(--mut)}
+.ag-a.done{opacity:.7}.ag-a.noshow{opacity:.45;text-decoration:line-through}
+.ag-now{position:absolute;left:56px;right:0;height:2px;background:var(--bad);z-index:3}
 </style>
 </head>
 <body>
@@ -106,7 +147,7 @@ a{color:var(--ac)}
 <button id="fab" class="hide" onclick="newAppt()" aria-label="Nueva cita">+</button>
 <nav id="nav" class="hide"></nav>
 <script>
-const APP_URL='https://luisvanegas15-wq.github.io/Mi-Cita/',SOPORTE='',SECRET='mc26-LV-3e5976b0',TRIAL=7;
+const APPNAME='MiCita',APP_URL='https://luisvanegas15-wq.github.io/Mi-Cita/',SOPORTE='',SECRET='mc26-LV-3e5976b0',TRIAL=7;
 function h53(str,seed=0){let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
 h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0)}
 const normN=n=>(n||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/[^A-Z]/g,'');
@@ -193,7 +234,7 @@ function render(){
  if(B.pin&&!unlocked){nav.classList.add('hide');fab.classList.add('hide');$('#app').innerHTML=vLock();return}
  if(showAct||trialLeft()<=0){nav.classList.add('hide');fab.classList.add('hide');$('#app').innerHTML=vActivar();return}
  nav.classList.remove('hide');fab.classList.toggle('hide',tab==='mas');
- nav.innerHTML=Object.entries(NAV).map(([k,v])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${v[1]}</svg>${v[0]}</button>`).join('');
+ nav.innerHTML=navHTML();
  const tb=lic&&lic.trial?`<div class="banner row between"><span>🎁 Prueba gratis: <b>${trialLeft()} día${trialLeft()===1?'':'s'}</b></span><button class="btn s dark" onclick="showAct=true;render()">Activar</button></div>`:'';
  const demo=B.demo?`<div class="banner" style="background:var(--confb)"><b>Estás viendo datos de ejemplo.</b> Explora con calma. <a href="#" onclick="clearDemo();return false">Empezar con mis datos</a></div>`:'';
  $('#app').innerHTML=tb+demo+({hoy:vHoy,agenda:vAgenda,clientes:vClientes,caja:vCaja,mas:vMas}[tab])();
@@ -225,18 +266,18 @@ function vHoy(){const t=iso(today()),tm=addD(t,1),list=dayAppts(t),act=list.filt
  const md=t.slice(5),wk=[0,1,2,3,4,5,6].map(i=>addD(t,i).slice(5));
  const bd=CL.filter(c=>c.bday&&wk.includes(c.bday));
  const wl=WL.filter(w=>!w.date||w.date>=t).length;
- return `<div class="hero"><div class="mut sm">${cap(dLong(t))}</div><h1 style="margin-top:2px">${sal}, ${esc(B.owner.split(' ')[0])}</h1>
+ return `<div class="dash"><div class="d1"><div class="hero"><div class="mut sm">${cap(dLong(t))}</div><h1 style="margin-top:2px">${sal}, ${esc(B.owner.split(' ')[0])}</h1>
  <div class="mut sm" style="position:relative;z-index:1">${next?`Próxima: <b style="color:#fff">${h12(next.time)}</b> · ${esc(cli(next.cid).name)}, ${esc(svc(next.sid).name.toLowerCase())}`:act.length?'Ya no tienes más citas pendientes hoy ✨':'Hoy tienes la agenda libre.'}</div>
  <div class="kpis"><div class="kpi"><b>${act.length}</b><span>citas hoy</span></div><div class="kpi"><b>${money(income)}</b><span>cobrado</span></div><div class="kpi"><b>${money(expected)}</b><span>esperado</span></div></div></div>
  <div class="row" style="gap:8px;margin-bottom:12px"><button class="btn grow nw" onclick="shareSlots()">📣 Mis espacios</button><button class="btn grow nw" onclick="pasteOrder()">📥 Pegar pedido</button></div>
  <div class="card"><div class="row between" style="margin-bottom:6px"><h2 style="margin:0">Citas de hoy</h2><button class="btn s ghost" onclick="selDay=iso(today());go('agenda')">Ver agenda</button></div>
  ${list.length?list.map(a=>apRow(a)).join(''):`<div class="empty">Sin citas para hoy.<br><button class="btn pri" style="margin-top:10px" onclick="newAppt()">Agendar una cita</button></div>`}</div>
- ${tom.length?`<div class="card"><h2>Recordatorios para mañana</h2><p class="sm mut" style="margin:-4px 0 8px">${pendRem.length?`Te faltan ${pendRem.length} por enviar. Un recordatorio reduce las citas perdidas.`:'¡Listo! Ya recordaste todas las citas de mañana.'}</p>
+ </div><div class="d2">${tom.length?`<div class="card"><h2>Recordatorios para mañana</h2><p class="sm mut" style="margin:-4px 0 8px">${pendRem.length?`Te faltan ${pendRem.length} por enviar. Un recordatorio reduce las citas perdidas.`:'¡Listo! Ya recordaste todas las citas de mañana.'}</p>
  ${tom.map(a=>`<div class="li"><div><b>${h12(a.time)}</b> · ${esc(cli(a.cid).name)}<div class="xs mut">${esc(svc(a.sid).name)}</div></div><button class="btn s ${a.rem?'ghost':'wa'}" onclick="wa('rec','${a.id}')">${a.rem?'✓ Enviado':'Enviar'}</button></div>`).join('')}</div>`:''}
  ${due.length?`<div class="card"><h2>🔁 Ya les toca volver</h2><p class="sm mut" style="margin:-4px 0 8px">Según cada cuánto se hacen su servicio.</p>${due.map(x=>`<div class="li"><div><b>${esc(x.c.name)}</b><div class="xs mut">${esc(svc(x.a.sid).name)} · ${x.left>0?'le toca en '+x.left+' día'+(x.left===1?'':'s'):x.left===0?'le toca hoy':'le tocaba hace '+(-x.left)+' día'+(x.left===-1?'':'s')}</div></div><div class="row" style="gap:6px"><button class="btn s wa" onclick="wa('toca','${x.a.id}')">Escribir</button><button class="btn s" onclick="newAppt(null,null,'${x.c.id}','${x.a.sid}')">Agendar</button></div></div>`).join('')}</div>`:''}
  ${bd.length?`<div class="card"><h2>🎂 Cumpleaños esta semana</h2>${bd.map(c=>`<div class="li"><div><b>${esc(c.name)}</b><div class="xs mut">${c.bday===md?'¡Hoy!':dShort(t.slice(0,4)+'-'+c.bday)}</div></div><button class="btn s wa" onclick="wa('cumple',null,'${c.id}')">Felicitar</button></div>`).join('')}</div>`:''}
  ${away.length?`<div class="card"><h2>Clientes para invitar de nuevo</h2><p class="sm mut" style="margin:-4px 0 8px">No vienen hace más de 5 semanas y no tienen cita.</p>${away.map(x=>`<div class="li"><div><b>${esc(x.c.name)}</b><div class="xs mut">Última visita hace ${daysBetween(x.l,t)} días</div></div><button class="btn s wa" onclick="wa('vuelve',null,'${x.c.id}')">Invitar</button></div>`).join('')}</div>`:''}
- ${wl?`<div class="card row between" style="cursor:pointer" onclick="vWait()"><span>⏳ <b>${wl}</b> en lista de espera</span><span class="mut">›</span></div>`:''}`}
+ ${wl?`<div class="card row between" style="cursor:pointer" onclick="vWait()"><span>⏳ <b>${wl}</b> en lista de espera</span><span class="mut">›</span></div>`:''}</div></div>`}
 function freeSlots(d){if(!B.days.includes(parse(d).getDay()))return[];const o=toMin(B.open),c=toMin(B.close);let cur=o;const out=[];
  dayAppts(d).filter(active).forEach(a=>{const s=toMin(a.time),e=s+(a.dur||60);if(s-cur>=30)out.push([Math.max(cur,o),Math.min(s,c)]);cur=Math.max(cur,e)});if(c-cur>=30)out.push([cur,c]);
  const t=iso(today());if(d===t){const n=new Date(),nm=n.getHours()*60+n.getMinutes();return out.map(([a,b])=>[Math.max(a,Math.ceil(nm/15)*15),b]).filter(([a,b])=>b-a>=30)}return d<t?[]:out}
@@ -371,12 +412,12 @@ function vCaja(){const[a,b]=range(cajaP),inR=x=>x.date>=a&&x.date<=b;
  <div class="kpis"><div class="kpi"><b>${money(inc)}</b><span>servicios</span></div><div class="kpi"><b>${money(tips)}</b><span>propinas</span></div><div class="kpi"><b>${money(out)}</b><span>gastos</span></div></div></div>
  <button class="btn dark full" style="margin-bottom:12px" onclick="closeDay()">🧾 Cierre de caja de hoy</button>
  ${pendDep?`<div class="banner" style="background:var(--okb)">💰 Tienes <b>${money(pendDep)}</b> en abonos de citas que aún no se atienden.</div>`:''}
- <div class="card"><h2>Últimos 7 días</h2><div class="bars">${v7.map((v,i)=>`<div><span style="height:${Math.round(v/mx*85)}%"></span><small>${parse(last7[i]).toLocaleDateString('es-CO',{weekday:'narrow'})}</small></div>`).join('')}</div></div>
+ <div class="grid2"><div class="card"><h2>Últimos 7 días</h2><div class="bars">${v7.map((v,i)=>`<div><span style="height:${Math.round(v/mx*85)}%"></span><small>${parse(last7[i]).toLocaleDateString('es-CO',{weekday:'narrow'})}</small></div>`).join('')}</div></div>
  <div class="card"><h2>Por medio de pago</h2>${Object.keys(byM).length?Object.entries(byM).sort((x,y)=>y[1]-x[1]).map(([m,v])=>`<div class="li"><span>${m}</span><b>${money(v)}</b></div>`).join(''):'<div class="empty">Aún no hay pagos en este periodo.</div>'}</div>
  <div class="card"><h2>Servicios que más dejan</h2>${top.length?top.map(([sid,[n,v]])=>`<div class="li"><div><b>${esc(svc(sid).name)}</b><div class="xs mut">${n} ${n===1?'vez':'veces'}</div></div><b>${money(v)}</b></div>`).join(''):'<div class="empty">Sin datos todavía.</div>'}
  ${all.length?`<p class="sm mut" style="margin-top:10px">Citas perdidas (no vino): <b>${ns}</b> de ${all.length} (${Math.round(ns/all.length*100)}%)</p>`:''}</div>
  <div class="card"><div class="row between"><h2 style="margin:0">Gastos</h2><button class="btn s pri" onclick="addExp()">+ Gasto</button></div>
- ${exs.length?exs.sort((x,y)=>y.date.localeCompare(x.date)).map(x=>`<div class="li"><div><b>${esc(x.concept)}</b><div class="xs mut">${dShort(x.date)}</div></div><div class="row"><b>${money(x.amount)}</b><button class="btn s ghost" onclick="EX=EX.filter(e=>e.id!=='${x.id}');save();render()">✕</button></div></div>`).join(''):'<p class="sm mut" style="margin-top:8px">Registra insumos, arriendo o servicios para ver tu ganancia real.</p>'}</div>`}
+ ${exs.length?exs.sort((x,y)=>y.date.localeCompare(x.date)).map(x=>`<div class="li"><div><b>${esc(x.concept)}</b><div class="xs mut">${dShort(x.date)}</div></div><div class="row"><b>${money(x.amount)}</b><button class="btn s ghost" onclick="EX=EX.filter(e=>e.id!=='${x.id}');save();render()">✕</button></div></div>`).join(''):'<p class="sm mut" style="margin-top:8px">Registra insumos, arriendo o servicios para ver tu ganancia real.</p>'}</div></div>`}
 function closeDay(){const t=iso(today()),rows=AP.filter(x=>x.date===t),done=rows.filter(x=>x.status==='done'),ns=rows.filter(x=>x.status==='noshow'),pend=rows.filter(x=>x.status==='pend'||x.status==='conf');
  const inc=rows.reduce((s,x)=>s+apInc(x),0),tips=rows.reduce((s,x)=>s+apTip(x),0),out=EX.filter(e=>e.date===t).reduce((s,e)=>s+e.amount,0);
  const byM={};rows.forEach(x=>{if(x.dep&&(x.status==='done'||x.status==='noshow'))byM[x.dep.method]=(byM[x.dep.method]||0)+x.dep.amount;if(x.status==='done'&&x.paid)byM[x.paid.method]=(byM[x.paid.method]||0)+x.paid.amount+(x.paid.tip||0)});
@@ -467,7 +508,7 @@ function startApp(){const n=ob.name.trim(),o=ob.owner.trim();if(!n||!o){$('#oer'
  B=baseBiz(n,o,ob.type);SV=mkSvc(ob.type);CL=[];AP=[];EX=[];WL=[];
  if(!lic){lic={trial:1,date:iso(today())};store.set('lic',lic)}save();unlocked=true;tab='hoy';render();vPrices(true)}
 function startDemo(){const t=iso(today());B=baseBiz('Nails by Caro','Carolina','unas');B.demo=1;B.wa='3001234567';B.policy='Se separa con abono de $10.000 por Nequi';B.addr='Barrio El Prado';
- SV=mkSvc('unas','s');
+ SV=mkSvc('unas','s');SV[3].dep=20000;SV[4].dep=15000;if(SV[5])SV[5].dep=20000;
  const names=[['Laura Gómez','3001234567','Le gusta el diseño francés'],['Valentina Ríos','3112223344',''],['Daniela Ortiz','3205556677','Alérgica al acrílico: solo semipermanente'],['Camila Torres','3157778899',''],['Juliana Pérez','3014445566','Siempre llega 10 min antes'],['Mariana López','3189990011',''],['Sofía Herrera','3046667788',''],['Paula Castro','3123334455','Prefiere tonos nude'],['Andrea Mejía','3171112233',''],['Natalia Rojas','3009998877','']];
  CL=names.map((n,i)=>({id:'c'+i,name:n[0],phone:n[1],notes:n[2],bday:i===3?addD(t,2).slice(5):i===7?'03-14':'',created:addD(t,-60)}));
  AP=[];let sd=11;const R=()=>{sd|=0;sd=sd+0x6D2B79F5|0;let x=Math.imul(sd^sd>>>15,1|sd);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296};const times=['08:30','09:30','10:30','11:30','14:00','15:00','16:30','17:30'];
@@ -584,6 +625,10 @@ function activar(){const n=$('#an').value.trim(),c=normC($('#acd').value);if(nor
  lic={name:n,code:c,date:iso(today())};store.set('lic',lic);showAct=false;let nm=n.split(/\s+/)[0];nm=nm.charAt(0).toUpperCase()+nm.slice(1).toLowerCase();render();
  modal(`<div style="text-align:center"><div style="font-size:46px">💖</div><h2>¡Listo, ${esc(nm)}!</h2><p class="mut">MiCita quedó activada para siempre. Que tu agenda se llene y tu negocio crezca.</p><button class="btn pri full" style="margin-top:14px" onclick="closeM()">Continuar</button></div>`)}
 
+/* ---------- Diseño adaptable ---------- */
+const isWide=()=>innerWidth>=900;let wideNow=isWide();
+addEventListener('resize',()=>{const w=isWide();if(w!==wideNow){wideNow=w;if(B&&!getBooking())render()}});
+function navHTML(){return `<div class="sb-top"><div class="sb-brand"><img src="icon-192.png" alt=""><div><b>${APPNAME}</b><span>${esc(B.name)}</span></div></div><button class="btn pri full" onclick="newAppt()">+ Nueva cita</button></div>`+Object.entries(NAV).map(([k,v])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${v[1]}</svg><span>${v[0]}</span></button>`).join('')}
 render();
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&B)render()});
