@@ -98,7 +98,7 @@ a{color:var(--ac)}
 .pin i.f{background:var(--ink)}
 .kp{display:grid;grid-template-columns:repeat(3,72px);gap:12px;justify-content:center}
 .kp button{height:64px;border-radius:50%;border:0;background:var(--card);font-size:24px;font-weight:600;cursor:pointer;border:1px solid var(--line)}
-.nw{white-space:nowrap}.phs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.phs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:pointer;border:1px solid var(--line)}.phs span{grid-column:1/-1}
+.tot{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;border-radius:14px;padding:10px 14px;margin-top:12px}.tot b{display:block;font-size:20px}.tot .xs.mut,.tot .mut{color:#cdbfcc}.prow,.prow2{display:grid;grid-template-columns:1fr 92px 82px;gap:8px;align-items:center;padding:6px 0}.prow2{grid-template-columns:1fr 110px}.prow input,.prow2 input{padding:8px 10px}.nw{white-space:nowrap}.phs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.phs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:pointer;border:1px solid var(--line)}.phs span{grid-column:1/-1}
 </style>
 </head>
 <body>
@@ -136,19 +136,27 @@ const avColor=n=>COLORS[h53(n||'x')%COLORS.length];
 const initials=n=>(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const ST={pend:'Pendiente',conf:'Confirmada',done:'Atendida',noshow:'No vino',cancel:'Cancelada'};
 const METHODS=['Efectivo','Nequi','Daviplata','Transferencia','Tarjeta'];
-const TYPES={unas:['💅','Uñas',[['Manicure tradicional',20000,45,15],['Pedicure',25000,60,30],['Semipermanente manos',45000,75,21],['Uñas acrílicas',90000,120,21],['Retoque acrílico',60000,90,21]]],
-barberia:['💈','Barbería',[['Corte',20000,30,21],['Corte y barba',30000,45,21],['Barba',12000,20,14],['Corte niño',15000,30,30],['Cejas',5000,10,21]]],
+const TYPES={unas:['💅','Uñas',[['Manicure tradicional',20000,45,15],['Pedicure',25000,60,30],['Semipermanente manos',45000,75,21],['Uñas acrílicas',90000,120,21],['Retoque acrílico',60000,90,21],['Polygel',80000,105,21]]],
+barberia:['💈','Barbería',[['Corte clásico',20000,30,21],['Corte degradado',25000,40,21],['Corte y barba',32000,50,21],['Barba',12000,20,14],['Corte niño',15000,30,30],['Cejas',5000,10,21]]],
 cejas:['👁️','Cejas y pestañas',[['Diseño de cejas',20000,30,21],['Cejas con henna',35000,45,21],['Laminado de cejas',60000,60,45],['Lifting de pestañas',70000,60,45],['Extensiones de pestañas',120000,120,21]]],
 pelu:['✂️','Peluquería',[['Corte dama',30000,45,45],['Cepillado',30000,45,0],['Tinte',90000,120,45],['Mechas o balayage',250000,180,90],['Keratina',180000,150,120]]],
 estetica:['🌿','Estética y spa',[['Limpieza facial',70000,60,30],['Depilación con cera',25000,30,30],['Masaje relajante',80000,60,0],['Hidratación facial',60000,45,30]]],
 otro:['✨','Otro',[['Servicio',30000,60,0]]]};
-const mkSvc=(type,pre)=>TYPES[type][2].map(([nm,p,d,e],i)=>({id:(pre||uid())+i,name:nm,price:p,dur:d,every:e||0,color:COLORS[i%COLORS.length]}));
-const TPL={conf:'Hola {cliente} ✨ Quedó agendada tu cita de {servicio} para el {dia} a las {hora} en {negocio}. ¡Te espero!',
-rec:'Hola {cliente} 👋 Te recuerdo tu cita de {servicio} en {negocio} el {dia} a las {hora}. ¿Me confirmas? Si no puedes venir, avísame para darle el espacio a otra persona. ¡Gracias!',
+const ADDS={unas:[['Decoración (por uña)',2000,5],['Francés',5000,10],['Retiro de acrílico',15000,20],['Uña rota o reparación',3000,5]],
+barberia:[['Diseño o línea',5000,10],['Lavado',3000,5],['Mascarilla negra',8000,10],['Tinte de barba',10000,15],['Cejas',5000,10]],
+cejas:[['Tinte',10000,10],['Depilación de bozo',8000,10],['Pestañas postizas',15000,15]],
+pelu:[['Cabello largo',20000,15],['Lavado',5000,10],['Tratamiento o hidratación',25000,20],['Peinado',30000,30]],
+estetica:[['Mascarilla',15000,10],['Alta frecuencia',10000,10],['Exfoliación',12000,10]],otro:[]};
+const mkSvc=(type,pre)=>TYPES[type][2].map(([nm,p,d,e],i)=>({id:(pre||uid())+i,name:nm,price:p,dur:d,every:e||0,dep:0,color:COLORS[i%COLORS.length]}));
+const mkAdd=(type,pre)=>(ADDS[type]||[]).map(([nm,p,m],i)=>({id:(pre||'x'+uid())+i,name:nm,price:p,min:m}));
+const addOf=id=>(B.addons||[]).find(x=>x.id===id);
+const addTxt=a=>a.add&&a.add.length?' + '+a.add.map(x=>x[0]).join(' + '):'';
+const TPL={conf:'Hola {cliente} ✨ Quedó agendada tu cita de {servicio} para {dia} a las {hora} en {negocio}. ¡Te espero!',
+rec:'Hola {cliente} 👋 Te recuerdo tu cita de {servicio} en {negocio} {dia} a las {hora}. ¿Me confirmas? Si no puedes venir, avísame para darle el espacio a otra persona. ¡Gracias!',
 gracias:'Gracias por venir, {cliente} 💖 Fue un gusto atenderte en {negocio}. Si te gustó, me ayudas mucho recomendándome. ¡Te espero pronto!',
 toca:'Hola {cliente} ✨ Ya te va tocando tu {servicio}. ¿Te separo un espacio esta semana en {negocio}?',
 vuelve:'Hola {cliente} 😊 Hace rato no te vemos en {negocio}. Esta semana tengo espacios disponibles, ¿te agendo?',
-espera:'Hola {cliente} 😊 Se liberó un espacio en {negocio} el {dia} a las {hora}. ¿Lo quieres? Respóndeme rápido para separártelo.',
+espera:'Hola {cliente} 😊 Se liberó un espacio en {negocio} {dia} a las {hora}. ¿Lo quieres? Respóndeme rápido para separártelo.',
 cumple:'¡Feliz cumpleaños, {cliente}! 🎂 De parte de {negocio} te deseamos un día increíble. Tienes un detalle especial en tu próxima cita.'};
 const TPLN={conf:'Al agendar',rec:'Recordatorio',gracias:'Gracias después de la cita',toca:'Ya le toca volver',vuelve:'Invitar a volver',espera:'Lista de espera',cumple:'Cumpleaños'};
 let B=store.get('biz',null),SV=store.get('svc',[]),CL=store.get('cli',[]),AP=store.get('apt',[]),EX=store.get('exp',[]),WL=store.get('wl',[]),lic=store.get('lic',null);
@@ -170,7 +178,9 @@ function closeM(){const o=$('#ov');if(o)o.remove()}
 /* ---------- WhatsApp ---------- */
 function phoneWA(p){let d=(p||'').replace(/\D/g,'');if(d.length===10&&d[0]==='3')d='57'+d;return d}
 function fill(t,a,c,slot){const s=a?svc(a.sid):null;const dd=slot?slot.date:a&&a.date,hh=slot?slot.time:a&&a.time;
- return (B.tpl[t]||TPL[t]).replace(/\{cliente\}/g,(c.name||'').split(' ')[0]).replace(/\{servicio\}/g,s?s.name.toLowerCase():'').replace(/\{dia\}/g,dd?(dd===iso(today())?'hoy':dd===addD(iso(today()),1)?'mañana':dLong(dd)):'').replace(/\{hora\}/g,hh?h12(hh):'').replace(/\{negocio\}/g,B.name)}
+ let out=(B.tpl[t]||TPL[t]).replace(/\{cliente\}/g,(c.name||'').split(' ')[0]).replace(/\{servicio\}/g,s?(s.name+(t==='conf'||t==='rec'?addTxt(a):'')).toLowerCase():'').replace(/\{dia\}/g,dd?(dd===iso(today())?'hoy':dd===addD(iso(today()),1)?'mañana':'el '+dLong(dd)):'').replace(/\{hora\}/g,hh?h12(hh):'').replace(/\{negocio\}/g,B.name).replace(/\{total\}/g,a?money(a.price):'');
+ if(a&&(t==='conf'||t==='rec')&&!/\{total\}/.test(B.tpl[t]||TPL[t])){out+=`\n\n💵 Total: ${money(a.price)}`+(a.dep?` · ya abonaste ${money(a.dep.amount)}, te falta ${money(a.price-a.dep.amount)}`:svc(a.sid).dep?` · para separar abona ${money(svc(a.sid).dep)}`:'')}
+ return out}
 function wa(t,aid,cid){const a=aid?AP.find(x=>x.id===aid):null;const c=cli(cid||(a&&a.cid));const p=phoneWA(c.phone);if(!p){toast('Este cliente no tiene celular guardado');return}
 if(a&&t==='rec'){a.rem=1;save()}window.open('https://wa.me/'+p+'?text='+encodeURIComponent(fill(t,a,c)),'_blank');setTimeout(render,300)}
 
@@ -196,7 +206,7 @@ function apRow(a,opts={}){const s=svc(a.sid),c=cli(a.cid),end=fromMin(toMin(a.ti
  else if(a.status==='done'){acts=`<span class="sm mut">${money(apInc(a))}${apTip(a)?' + '+money(apTip(a))+' propina':''} · ${a.paid?a.paid.method:''}</span><button class="btn s ghost" onclick="wa('gracias','${a.id}')">Agradecer</button>`}
  return `<div class="ap ${a.status}"><div class="t"><b>${a.time}</b><span class="xs mut">${end}</span></div><div class="bar" style="--c:${s.color}"></div><div class="grow">
  <div class="row between"><b onclick="openCli('${c.id}')" style="cursor:pointer">${esc(c.name)}${ns&&a.status!=='done'?` <span title="No ha venido ${ns} vez" style="font-size:13px">⚠️</span>`:''}</b><span class="row" style="gap:2px"><span class="chip st-${a.status}">${ST[a.status]}</span><button class="dots" onclick="apMenu('${a.id}')" aria-label="Opciones">⋯</button></span></div>
- <div class="sm mut">${esc(s.name)} · ${money(a.price)}${opts.date?' · '+dShort(a.date):''}</div>${a.dep&&a.status!=='done'?`<div class="xs" style="color:var(--ok);font-weight:600">✓ Abonó ${money(a.dep.amount)} · falta ${money(a.price-a.dep.amount)}</div>`:''}${a.note?`<div class="xs mut">📝 ${esc(a.note)}</div>`:''}
+ <div class="sm mut">${esc(s.name+addTxt(a))} · ${money(a.price)}${opts.date?' · '+dShort(a.date):''}</div>${a.dep&&a.status!=='done'?`<div class="xs" style="color:var(--ok);font-weight:600">✓ Abonó ${money(a.dep.amount)} · falta ${money(a.price-a.dep.amount)}</div>`:''}${a.note?`<div class="xs mut">📝 ${esc(a.note)}</div>`:''}
  <div class="acts">${acts}</div></div></div>`}
 function dayAppts(d){return AP.filter(a=>a.date===d).sort((a,b)=>toMin(a.time)-toMin(b.time))}
 function lastVisit(cid){const v=AP.filter(a=>a.cid===cid&&a.status==='done').map(a=>a.date).sort();return v[v.length-1]||null}
@@ -277,25 +287,30 @@ function delCli(id){const n=AP.filter(a=>a.cid===id).length;if(!$('#ov').dataset
  CL=CL.filter(c=>c.id!==id);AP=AP.filter(a=>a.cid!==id);WL=WL.filter(w=>w.cid!==id);save();photosDB('readwrite',st=>{const r=st.index('cid').openCursor(IDBKeyRange.only(id));r.onsuccess=()=>{const c=r.result;if(c){c.delete();c.continue()}}});closeM();render()}
 /* ---------- Citas ---------- */
 let draft=null;
-function newAppt(date,time,cid,sid){overlapOK=false;const s0=sid?svc(sid):SV[0];draft={id:null,date:date||(tab==='agenda'?selDay:iso(today())),time:time||'',cid:cid||'',sid:s0?s0.id:'',price:s0?s0.price:0,dur:s0?s0.dur:60,note:'',newName:'',newPhone:'',dep:null};
+function newAppt(date,time,cid,sid){overlapOK=false;const s0=sid?svc(sid):SV[0];draft={id:null,date:date||(tab==='agenda'?selDay:iso(today())),time:time||'',cid:cid||'',sid:s0?s0.id:'',add:[],price:s0?s0.price:0,dur:s0?s0.dur:60,note:'',newName:'',newPhone:'',dep:null};
  if(!draft.time){const fs=freeSlots(draft.date);draft.time=fs[0]?fromMin(fs[0][0]):B.open}apForm()}
-function editAppt(id){const a=AP.find(x=>x.id===id);overlapOK=false;draft={...a,newName:'',newPhone:''};apForm()}
-function apForm(){const d=draft,c=d.cid?cli(d.cid):null,ns=d.cid?noShows(d.cid):0;
+function editAppt(id){const a=AP.find(x=>x.id===id);overlapOK=false;draft={...a,add:(a.add||[]).map(x=>{const o=(B.addons||[]).find(y=>y.name===x[0]);return o?o.id:null}).filter(Boolean),newName:'',newPhone:''};apForm()}
+function apForm(){const d=draft,c=d.cid?cli(d.cid):null,ns=d.cid?noShows(d.cid):0,s=svc(d.sid),sug=s.dep||0;
  const opts=CL.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${x.id}" ${x.id===d.cid?'selected':''}>${esc(x.name)}</option>`).join('');
+ const adds=B.addons||[];
  modal(`<div class="row between"><h2 style="margin:0">${d.id?'Editar cita':'Nueva cita'}</h2>${d.id?'':`<button class="btn s ghost" onclick="pasteOrder()">📥 Pegar pedido</button>`}</div>
  <label class="f">Cliente</label><select id="ac" onchange="draft.cid=this.value;apForm()"><option value="">+ Cliente nuevo</option>${opts}</select>
  ${d.cid?'':`<div class="row" style="margin-top:8px"><input id="nn" placeholder="Nombre" value="${esc(d.newName)}" oninput="draft.newName=this.value"><input id="np" placeholder="Celular" inputmode="tel" value="${esc(d.newPhone)}" oninput="draft.newPhone=this.value"></div>`}
  ${ns?`<div class="banner" style="background:var(--badb);color:var(--bad);margin:8px 0 0">⚠️ ${esc(c.name.split(' ')[0])} no vino ${ns} vez${ns===1?'':'es'}. Te sugerimos pedirle abono.</div>`:''}
  ${c&&c.notes?`<div class="xs mut" style="margin-top:6px">📝 ${esc(c.notes)}</div>`:''}
- <label class="f">Servicio</label><div class="pills">${SV.map(s=>`<button class="pill ${s.id===d.sid?'on':''}" onclick="pickSvc('${s.id}')">${esc(s.name)}</button>`).join('')}</div>
+ <label class="f">Servicio</label><div class="pills">${SV.map(x=>`<button class="pill ${x.id===d.sid?'on':''}" onclick="pickSvc('${x.id}')">${esc(x.name)} · ${money(x.price)}</button>`).join('')}</div>
+ ${adds.length?`<label class="f">Adicionales</label><div class="pills">${adds.map(x=>`<button class="pill ${(d.add||[]).includes(x.id)?'on':''}" onclick="togAdd('${x.id}')">${(d.add||[]).includes(x.id)?'✓ ':'+ '}${esc(x.name)} ${money(x.price)}</button>`).join('')}</div>`:''}
+ <div class="tot"><div><span class="xs mut">Total a pagar</span><b>${money(d.price)}</b></div><div style="text-align:right"><span class="xs mut">${d.dur} min</span>${sug?`<div class="xs" style="color:var(--ok);font-weight:600">Abono para separar: ${money(sug)}</div>`:''}</div></div>
  <div class="row"><div class="grow"><label class="f">Fecha</label><input type="date" id="ad" value="${d.date}" onchange="draft.date=this.value;apForm()"></div><div class="grow"><label class="f">Hora</label><input type="time" id="at" value="${d.time}" step="300" onchange="draft.time=this.value"></div></div>
  ${(()=>{const f=freeSlots(d.date);return f.length?`<div class="xs mut" style="margin-top:6px">Libre: ${f.map(([a,b])=>`<a href="#" onclick="draft.time='${fromMin(a)}';apForm();return false">${fromMin(a)}–${fromMin(b)}</a>`).join(' · ')}</div>`:''})()}
- <div class="row"><div class="grow"><label class="f">Precio</label><input id="apr" inputmode="numeric" value="${d.price}" oninput="draft.price=+this.value.replace(/\\D/g,'')||0"></div><div class="grow"><label class="f">Duración (min)</label><input id="adu" inputmode="numeric" value="${d.dur}" oninput="draft.dur=+this.value.replace(/\\D/g,'')||0"></div></div>
- <label class="f">Abono (opcional)</label><div class="row"><input id="adp" inputmode="numeric" placeholder="$0" value="${d.dep?d.dep.amount:''}" oninput="const v=+this.value.replace(/\\D/g,'')||0;draft.dep=v?{amount:v,method:(draft.dep&&draft.dep.method)||'Nequi'}:null"><select id="adm" onchange="if(draft.dep)draft.dep.method=this.value">${METHODS.map(m=>`<option ${d.dep&&d.dep.method===m||(!d.dep&&m==='Nequi')?'selected':''}>${m}</option>`).join('')}</select></div>
+ <details style="margin-top:10px"><summary class="sm mut" style="cursor:pointer">Cambiar precio o duración de esta cita</summary><div class="row"><div class="grow"><label class="f">Precio</label><input id="apr" inputmode="numeric" value="${d.price}" oninput="draft.price=+this.value.replace(/\\D/g,'')||0"></div><div class="grow"><label class="f">Duración (min)</label><input id="adu" inputmode="numeric" value="${d.dur}" oninput="draft.dur=+this.value.replace(/\\D/g,'')||0"></div></div></details>
+ <label class="f">Abono${sug&&!d.dep?` · <a href="#" onclick="draft.dep={amount:${sug},method:document.querySelector('#adm').value};apForm();return false">usar ${money(sug)}</a>`:''}</label><div class="row"><input id="adp" inputmode="numeric" placeholder="$0" value="${d.dep?d.dep.amount:''}" oninput="const v=+this.value.replace(/\\D/g,'')||0;draft.dep=v?{amount:v,method:(draft.dep&&draft.dep.method)||'Nequi'}:null"><select id="adm" onchange="if(draft.dep)draft.dep.method=this.value">${METHODS.map(m=>`<option ${d.dep&&d.dep.method===m||(!d.dep&&m==='Nequi')?'selected':''}>${m}</option>`).join('')}</select></div>
  <label class="f">Nota (opcional)</label><input id="ano" value="${esc(d.note)}" placeholder="Ej: trae su propio diseño" oninput="draft.note=this.value">
  <div id="aer" class="err"></div>
  <button class="btn pri full" style="margin-top:14px" onclick="saveAppt()">${d.id?'Guardar cambios':'Agendar cita'}</button>`)}
-function pickSvc(id){const s=svc(id);draft.sid=id;draft.price=s.price;draft.dur=s.dur;apForm()}
+function recalc(){const s=svc(draft.sid);const ad=(draft.add||[]).map(addOf).filter(Boolean);draft.price=s.price+ad.reduce((t,x)=>t+x.price,0);draft.dur=s.dur+ad.reduce((t,x)=>t+(x.min||0),0)}
+function pickSvc(id){draft.sid=id;recalc();apForm()}
+function togAdd(id){draft.add=draft.add||[];draft.add=draft.add.includes(id)?draft.add.filter(x=>x!==id):[...draft.add,id];recalc();apForm()}
 function saveAppt(){const d=draft;d.time=$('#at').value;d.date=$('#ad').value;
  if(!d.cid){const n=(d.newName||'').trim();if(!n){$('#aer').textContent='Elige un cliente o escribe el nombre del nuevo.';return}
   const ex=CL.find(c=>normN(c.name)===normN(n));if(ex){d.cid=ex.id;if(!ex.phone&&d.newPhone)ex.phone=d.newPhone.trim()}else{const c={id:uid(),name:n,phone:(d.newPhone||'').trim(),notes:'',bday:'',created:iso(today())};CL.push(c);d.cid=c.id}}
@@ -305,12 +320,13 @@ function saveAppt(){const d=draft;d.time=$('#at').value;d.date=$('#ad').value;
  const s=toMin(d.time),e=s+(d.dur||30);
  const cross=AP.find(a=>a.id!==d.id&&a.date===d.date&&active(a)&&a.status!=='noshow'&&toMin(a.time)<e&&toMin(a.time)+(a.dur||60)>s);
  if(cross&&!overlapOK){overlapOK=true;$('#aer').textContent=`Se cruza con ${cli(cross.cid).name} a las ${cross.time}. Toca de nuevo para agendar igual.`;return}
- const isNew=!d.id;const rec={id:d.id||uid(),cid:d.cid,sid:d.sid,date:d.date,time:d.time,dur:d.dur,price:d.price,note:(d.note||'').trim(),status:d.status||'pend',paid:d.paid||null,rem:d.rem||0,dep:d.dep||null,src:d.src||''};
+ const add=(d.add||[]).map(addOf).filter(Boolean).map(x=>[x.name,x.price]);
+ const isNew=!d.id;const rec={id:d.id||uid(),cid:d.cid,sid:d.sid,add,date:d.date,time:d.time,dur:d.dur,price:d.price,note:(d.note||'').trim(),status:d.status||'pend',paid:d.paid||null,rem:d.rem||0,dep:d.dep||null,src:d.src||''};
  if(isNew)AP.push(rec);else Object.assign(AP.find(a=>a.id===rec.id),rec);
  if(d.wlId)WL=WL.filter(w=>w.id!==d.wlId);
  save();selDay=rec.date;weekStart=null;
  const c=cli(rec.cid);
- if(isNew){modal(`<div style="text-align:center"><div style="font-size:42px">✅</div><h2>Cita agendada</h2><p class="mut">${esc(c.name)} · ${esc(svc(rec.sid).name)}<br>${cap(dLong(rec.date))}, ${h12(rec.time)}${rec.dep?`<br><b style="color:var(--ok)">Abonó ${money(rec.dep.amount)}</b>`:''}</p>
+ if(isNew){modal(`<div style="text-align:center"><div style="font-size:42px">✅</div><h2>Cita agendada</h2><p class="mut">${esc(c.name)} · ${esc(svc(rec.sid).name+addTxt(rec))}<br>${cap(dLong(rec.date))}, ${h12(rec.time)}<br><b style="color:var(--ink)">Total ${money(rec.price)}</b>${rec.dep?` · <b style="color:var(--ok)">abonó ${money(rec.dep.amount)}</b>`:''}</p>
  ${c.phone?`<button class="btn wa full" style="margin-top:14px" onclick="wa('conf','${rec.id}');closeM()">Enviar confirmación por WhatsApp</button>`:''}<button class="btn ghost full" style="margin-top:8px" onclick="closeM()">Listo</button></div>`)}else closeM();render()}
 function setSt(id,st){const a=AP.find(x=>x.id===id);const was=a.status;a.status=st;if(st!=='done')a.paid=null;save();closeM();render();
  if(st==='cancel'&&was!=='cancel'&&a.date>=iso(today())){const w=WL.filter(x=>!x.date||x.date===a.date);if(w.length)freedModal(a,w)}}
@@ -391,13 +407,31 @@ function editBiz(){const dn=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
  <label class="f">Política de abono (opcional)</label><input id="bpo" value="${esc(B.policy||'')}" placeholder="Ej: Se separa con abono de $10.000 por Nequi">
  <button class="btn pri full" style="margin-top:16px" onclick="saveBiz()">Guardar</button>`)}
 function saveBiz(){B.name=$('#bn').value.trim()||B.name;B.owner=$('#bo').value.trim()||B.owner;B.wa=$('#bw').value.trim();B.addr=$('#ba').value.trim();B.policy=$('#bpo').value.trim();B.type=$('#bt').value;B.open=$('#bop').value||B.open;B.close=$('#bcl').value||B.close;B.days=[...document.querySelectorAll('#bds .pill.on')].map(p=>+p.dataset.d);save();closeM();render();toast('Guardado')}
-function vSvc(){modal(`<div class="row between"><h2 style="margin:0">Servicios</h2><button class="btn s pri" onclick="editSvc()">+ Nuevo</button></div><div class="card" style="margin-top:12px">${SV.map(s=>`<div class="li" style="cursor:pointer" onclick="editSvc('${s.id}')"><div class="row"><span style="width:10px;height:10px;border-radius:50%;background:${s.color}"></span><div><b>${esc(s.name)}</b><div class="xs mut">${s.dur} min${s.every?' · se repite cada '+s.every+' días':''}</div></div></div><b>${money(s.price)}</b></div>`).join('')||'<div class="empty">Sin servicios</div>'}</div>`)}
-function editSvc(id){const s=id?svc(id):{name:'',price:'',dur:60,every:0,color:COLORS[SV.length%COLORS.length]};
+function vSvc(){const ad=B.addons||[];modal(`<div class="row between"><h2 style="margin:0">Servicios</h2><button class="btn s pri" onclick="editSvc()">+ Nuevo</button></div>
+ <button class="btn full" style="margin-top:10px" onclick="vPrices()">💲 Editar todos los precios rápido</button>
+ <div class="card" style="margin-top:12px">${SV.map(s=>`<div class="li" style="cursor:pointer" onclick="editSvc('${s.id}')"><div class="row"><span style="width:10px;height:10px;border-radius:50%;background:${s.color};flex:none"></span><div><b>${esc(s.name)}</b><div class="xs mut">${s.dur} min${s.every?' · cada '+s.every+' días':''}${s.dep?' · abono '+money(s.dep):''}</div></div></div><b>${money(s.price)}</b></div>`).join('')||'<div class="empty">Sin servicios</div>'}</div>
+ <div class="row between" style="margin-top:6px"><h2 style="margin:0">Adicionales</h2><button class="btn s pri" onclick="editAdd()">+ Nuevo</button></div><p class="xs mut" style="margin:4px 0 8px">Extras que se suman al servicio: diseño, lavado, decoración…</p>
+ <div class="card">${ad.map(x=>`<div class="li" style="cursor:pointer" onclick="editAdd('${x.id}')"><div><b>${esc(x.name)}</b><div class="xs mut">${x.min?'+'+x.min+' min':'sin tiempo extra'}</div></div><b>+${money(x.price)}</b></div>`).join('')||'<div class="empty">Sin adicionales</div>'}</div>`)}
+function editAdd(id){const x=id?addOf(id):{name:'',price:'',min:0};
+ modal(`<h2>${id?'Editar':'Nuevo'} adicional</h2><label class="f">Nombre</label><input id="xn" value="${esc(x.name)}" placeholder="Ej: Diseño o línea"><div class="row"><div class="grow"><label class="f">Precio extra</label><input id="xp" inputmode="numeric" value="${x.price}"></div><div class="grow"><label class="f">Minutos extra</label><input id="xm" inputmode="numeric" value="${x.min||0}"></div></div><div id="xer" class="err"></div>
+ <button class="btn pri full" style="margin-top:16px" onclick="saveAdd('${id||''}')">Guardar</button>${id?`<button class="btn bad full" style="margin-top:8px" onclick="B.addons=B.addons.filter(y=>y.id!=='${id}');save();vSvc()">Eliminar adicional</button>`:''}`)}
+function saveAdd(id){const n=$('#xn').value.trim();if(!n){$('#xer').textContent='Escribe el nombre.';return}const o={name:n,price:+$('#xp').value.replace(/\D/g,'')||0,min:+$('#xm').value.replace(/\D/g,'')||0};B.addons=B.addons||[];
+ if(id)Object.assign(addOf(id),o);else B.addons.push({id:'x'+uid(),...o});save();vSvc()}
+function vPrices(first){const ad=B.addons||[];
+ modal(`<h2>${first?'Pon tus precios 💲':'Precios rápidos'}</h2><p class="sm mut">${first?'Cargué servicios típicos de '+TYPES[B.type][1].toLowerCase()+'. Cambia los precios por los tuyos. ':''}El abono es lo que pides para separar la cita (déjalo en 0 si no pides).</p>
+ <div class="card" style="margin-top:12px;padding:10px 12px"><div class="prow xs mut"><span>Servicio</span><span>Precio</span><span>Abono</span></div>
+ ${SV.map(s=>`<div class="prow"><span class="sm"><b>${esc(s.name)}</b></span><input data-s="${s.id}" data-k="price" inputmode="numeric" value="${s.price}"><input data-s="${s.id}" data-k="dep" inputmode="numeric" value="${s.dep||0}"></div>`).join('')}</div>
+ ${ad.length?`<div class="card" style="padding:10px 12px"><div class="prow2 xs mut"><span>Adicional</span><span>Precio extra</span></div>${ad.map(x=>`<div class="prow2"><span class="sm"><b>${esc(x.name)}</b></span><input data-x="${x.id}" inputmode="numeric" value="${x.price}"></div>`).join('')}</div>`:''}
+ <div class="row"><button class="btn grow" onclick="const p=prompt('¿Qué porcentaje de abono para todos? (ej: 30)','30');if(p===null)return;const k=(+p||0)/100;document.querySelectorAll('[data-k=dep]').forEach(i=>{const pr=+document.querySelector('[data-s=\\''+i.dataset.s+'\\'][data-k=price]').value.replace(/\\D/g,'')||0;i.value=Math.round(pr*k/1000)*1000})">Abono % a todos</button></div>
+ <button class="btn pri full" style="margin-top:12px" onclick="savePrices(${first?1:0})">Guardar precios</button>${first?'':`<button class="btn ghost full" style="margin-top:8px" onclick="vSvc()">Volver</button>`}`)}
+function savePrices(first){document.querySelectorAll('[data-s]').forEach(i=>{const s=svc(i.dataset.s);if(s.id)s[i.dataset.k]=+i.value.replace(/\D/g,'')||0});document.querySelectorAll('[data-x]').forEach(i=>{const x=addOf(i.dataset.x);if(x)x.price=+i.value.replace(/\D/g,'')||0});save();render();
+ if(first)modal(`<div style="text-align:center"><div style="font-size:42px">${TYPES[B.type][0]}</div><h2>¡Listo, ${esc(B.owner.split(' ')[0])}!</h2><p class="mut">Tus precios quedaron guardados. Puedes cambiarlos cuando quieras en <b>Más → Servicios</b>.</p><button class="btn pri full" style="margin-top:14px" onclick="closeM();newAppt()">Agendar mi primera cita</button><button class="btn ghost full" style="margin-top:8px" onclick="closeM()">Explorar primero</button></div>`);else{toast('Precios guardados');vSvc()}}
+function editSvc(id){const s=id?svc(id):{name:'',price:'',dur:60,every:0,dep:0,color:COLORS[SV.length%COLORS.length]};
  modal(`<h2>${id?'Editar':'Nuevo'} servicio</h2><label class="f">Nombre</label><input id="sn" value="${esc(s.name)}"><div class="row"><div class="grow"><label class="f">Precio</label><input id="sp" inputmode="numeric" value="${s.price}"></div><div class="grow"><label class="f">Duración (min)</label><input id="sd" inputmode="numeric" value="${s.dur}"></div></div>
- <label class="f">¿Cada cuántos días vuelve el cliente? (0 = no aplica)</label><input id="se" inputmode="numeric" value="${s.every||0}"><div class="xs mut" style="margin-top:4px">Ej: retoque de uñas cada 21 días. Así la app te avisa cuándo le toca.</div>
+ <div class="row"><div class="grow"><label class="f">Abono para separar</label><input id="sdp" inputmode="numeric" value="${s.dep||0}"></div><div class="grow"><label class="f">Vuelve cada (días)</label><input id="se" inputmode="numeric" value="${s.every||0}"></div></div><div class="xs mut" style="margin-top:4px">Abono 0 = no pides. Vuelve cada 0 = no aplica. Ej: retoque cada 21 días.</div>
  <label class="f">Color</label><div class="pills" id="scs">${COLORS.map(c=>`<button class="pill ${c===s.color?'on':''}" data-c="${c}" style="width:34px;height:34px;padding:0;background:${c};border-width:3px;border-color:${c===s.color?'var(--ink)':'transparent'}" onclick="document.querySelectorAll('#scs .pill').forEach(p=>{p.classList.remove('on');p.style.borderColor='transparent'});this.classList.add('on');this.style.borderColor='var(--ink)'"></button>`).join('')}</div><div id="ser" class="err"></div>
  <button class="btn pri full" style="margin-top:16px" onclick="saveSvc('${id||''}')">Guardar</button>${id?`<button class="btn bad full" style="margin-top:8px" onclick="SV=SV.filter(x=>x.id!=='${id}');save();vSvc()">Eliminar servicio</button>`:''}`)}
-function saveSvc(id){const n=$('#sn').value.trim();if(!n){$('#ser').textContent='Escribe el nombre.';return}const o={name:n,price:+$('#sp').value.replace(/\D/g,'')||0,dur:+$('#sd').value.replace(/\D/g,'')||30,every:+$('#se').value.replace(/\D/g,'')||0,color:($('#scs .pill.on')||{dataset:{c:COLORS[0]}}).dataset.c};
+function saveSvc(id){const n=$('#sn').value.trim();if(!n){$('#ser').textContent='Escribe el nombre.';return}const o={name:n,price:+$('#sp').value.replace(/\D/g,'')||0,dur:+$('#sd').value.replace(/\D/g,'')||30,dep:+$('#sdp').value.replace(/\D/g,'')||0,every:+$('#se').value.replace(/\D/g,'')||0,color:($('#scs .pill.on')||{dataset:{c:COLORS[0]}}).dataset.c};
  if(id)Object.assign(svc(id),o);else SV.push({id:uid(),...o});save();vSvc()}
 function vTpl(){modal(`<h2>Mensajes de WhatsApp</h2><p class="sm mut">Puedes usar {cliente}, {servicio}, {dia}, {hora} y {negocio}. Se reemplazan solos.</p>
  ${Object.keys(TPL).map(k=>`<label class="f">${TPLN[k]}</label><textarea id="t_${k}">${esc(B.tpl[k]||TPL[k])}</textarea>`).join('')}
@@ -428,11 +462,10 @@ function vWelcome(){if(ob.step===0)return `<div style="text-align:center;padding
  <button class="btn pri full" style="margin-top:16px" onclick="startApp()">Empezar · 7 días gratis</button></div>
  <button class="btn ghost full" onclick="startDemo()">Ver con datos de ejemplo</button>
  <p class="xs mut" style="text-align:center;margin-top:16px">Tus datos se guardan solo en este celular. Funciona sin internet.</p>`}
-function baseBiz(name,owner,type){return{name,owner,type,open:'08:00',close:'19:00',days:[1,2,3,4,5,6],tpl:{...TPL},pin:'',start:iso(today())}}
+function baseBiz(name,owner,type){return{name,owner,type,open:'08:00',close:'19:00',days:[1,2,3,4,5,6],tpl:{...TPL},pin:'',start:iso(today()),addons:mkAdd(type)}}
 function startApp(){const n=ob.name.trim(),o=ob.owner.trim();if(!n||!o){$('#oer').textContent='Escribe el nombre del negocio y tu nombre.';return}
  B=baseBiz(n,o,ob.type);SV=mkSvc(ob.type);CL=[];AP=[];EX=[];WL=[];
- if(!lic){lic={trial:1,date:iso(today())};store.set('lic',lic)}save();unlocked=true;tab='hoy';render();
- modal(`<div style="text-align:center"><div style="font-size:42px">${TYPES[B.type][0]}</div><h2>¡Hola, ${esc(o.split(' ')[0])}!</h2><p class="mut">Ya cargué servicios típicos de ${TYPES[B.type][1].toLowerCase()}. Ajusta precios, duración y frecuencia en <b>Más → Servicios</b>.</p><button class="btn pri full" style="margin-top:14px" onclick="closeM();newAppt()">Agendar mi primera cita</button><button class="btn ghost full" style="margin-top:8px" onclick="closeM()">Explorar primero</button></div>`)}
+ if(!lic){lic={trial:1,date:iso(today())};store.set('lic',lic)}save();unlocked=true;tab='hoy';render();vPrices(true)}
 function startDemo(){const t=iso(today());B=baseBiz('Nails by Caro','Carolina','unas');B.demo=1;B.wa='3001234567';B.policy='Se separa con abono de $10.000 por Nequi';B.addr='Barrio El Prado';
  SV=mkSvc('unas','s');
  const names=[['Laura Gómez','3001234567','Le gusta el diseño francés'],['Valentina Ríos','3112223344',''],['Daniela Ortiz','3205556677','Alérgica al acrílico: solo semipermanente'],['Camila Torres','3157778899',''],['Juliana Pérez','3014445566','Siempre llega 10 min antes'],['Mariana López','3189990011',''],['Sofía Herrera','3046667788',''],['Paula Castro','3123334455','Prefiere tonos nude'],['Andrea Mejía','3171112233',''],['Natalia Rojas','3009998877','']];
@@ -478,7 +511,7 @@ function shareSlots(){const l=slotsText(7);const link=B.wa?bookingURL():'';
 const b64e=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const b64d=s=>decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/'))));
 function bookingURL(){const t=iso(today()),fr=[];for(let i=0;i<14;i++){const f=freeSlots(addD(t,i));if(f.length)fr.push([i,f])}
- const data={n:B.name,y:B.type,w:phoneWA(B.wa),a:B.addr||'',p:B.policy||'',g:t,s:SV.map(s=>[s.name,s.price,s.dur]),f:fr};return APP_URL+'#r='+b64e(JSON.stringify(data))}
+ const data={n:B.name,y:B.type,w:phoneWA(B.wa),a:B.addr||'',p:B.policy||'',g:t,s:SV.map(s=>[s.name,s.price,s.dur,s.dep||0]),x:(B.addons||[]).map(x=>[x.name,x.price,x.min||0]),f:fr};return APP_URL+'#r='+b64e(JSON.stringify(data))}
 function vLink(){if(!B.wa){modal(`<h2>Link de reservas</h2><p class="mut">Tus clientes eligen servicio, día y hora desde un link, y el pedido te llega por WhatsApp. Sin mensualidades.</p><label class="f">WhatsApp de tu negocio</label><input id="lw" inputmode="tel" placeholder="300 123 4567"><div id="lwe" class="err"></div><button class="btn pri full" style="margin-top:14px" onclick="const v=document.querySelector('#lw').value.trim();if(phoneWA(v).length<10){document.querySelector('#lwe').textContent='Escribe un celular válido.';return}B.wa=v;save();vLink()">Crear mi link</button>`);return}
  const u=bookingURL();window._lu=u;
  modal(`<h2>Tu link de reservas 🔗</h2><p class="sm mut">Ponlo en tu bio de Instagram, en tu estado o envíalo a tus clientes. Muestra tus servicios y los espacios libres de las próximas 2 semanas.</p>
@@ -489,32 +522,36 @@ function vLink(){if(!B.wa){modal(`<h2>Link de reservas</h2><p class="mut">Tus cl
 function getBooking(){const h=location.hash;if(!h.startsWith('#r='))return null;try{return JSON.parse(b64d(h.slice(3)))}catch(e){return {err:1}}}
 let bk={s:-1,d:null,t:null};
 function vBook(D){if(D.err)return `<div class="empty" style="padding-top:80px">Este link de reservas no es válido. Pídele uno nuevo al negocio.</div>`;
- const t=iso(today()),days=D.f.map(([i,f])=>[addD(D.g,i),f]).filter(([d])=>d>=t);
+ const t=iso(today()),days=D.f.map(([i,f])=>[addD(D.g,i),f]).filter(([d])=>d>=t),X=D.x||[];bk.x=bk.x||[];
  const s=bk.s>=0?D.s[bk.s]:null;
+ const xs=bk.x.map(i=>X[i]).filter(Boolean),total=s?s[1]+xs.reduce((a,x)=>a+x[1],0):0,dur=s?s[2]+xs.reduce((a,x)=>a+(x[2]||0),0):0,dep=s?s[3]||0:0;
  const now=new Date(),nm=now.getHours()*60+now.getMinutes();
- const starts=(f,dur,d)=>{const o=[];f.forEach(([a,b])=>{for(let m=Math.ceil(a/30)*30;m+dur<=b;m+=30)if(d!==t||m>nm+30)o.push(m)});return o};
- const okDays=s?days.filter(([d,f])=>starts(f,s[2],d).length):[];
- const sel=okDays.find(([d])=>d===bk.d);
- return `<div style="text-align:center;padding:18px 0 6px"><div class="logo" style="font-size:30px">${(TYPES[D.y]||TYPES.otro)[0]}</div><h1>${esc(D.n)}</h1>${D.a?`<p class="sm mut">📍 ${esc(D.a)}</p>`:''}<p class="mut" style="margin-top:4px">Agenda tu cita en 3 pasos</p></div>
- <div class="card"><h2>1. Elige el servicio</h2>${D.s.map((x,i)=>`<div class="li" style="cursor:pointer" onclick="bk.s=${i};bk.d=null;bk.t=null;render()"><div><b>${bk.s===i?'✅ ':''}${esc(x[0])}</b><div class="xs mut">${x[2]} min</div></div><b>${money(x[1])}</b></div>`).join('')}</div>
- ${s?`<div class="card"><h2>2. Elige el día</h2>${okDays.length?`<div class="pills">${okDays.map(([d])=>{const dt=parse(d);return `<button class="pill ${bk.d===d?'on':''}" onclick="bk.d='${d}';bk.t=null;render()">${cap(WD[dt.getDay()])} ${dt.getDate()}</button>`}).join('')}</div>`:'<p class="mut">No hay espacios disponibles para este servicio en las próximas 2 semanas. Escríbele directamente al negocio.</p>'}</div>`:''}
- ${sel?`<div class="card"><h2>3. Elige la hora</h2><div class="pills">${starts(sel[1],s[2],sel[0]).map(m=>`<button class="pill ${bk.t===m?'on':''}" onclick="bk.t=${m};render()">${h12(fromMin(m))}</button>`).join('')}</div></div>`:''}
+ const starts=(f,du,d)=>{const o=[];f.forEach(([a,b])=>{for(let m=Math.ceil(a/30)*30;m+du<=b;m+=30)if(d!==t||m>nm+30)o.push(m)});return o};
+ const okDays=s?days.filter(([d,f])=>starts(f,dur,d).length):[];
+ const sel=okDays.find(([d])=>d===bk.d);let n=1;
+ return `<div style="text-align:center;padding:18px 0 6px"><div class="logo" style="font-size:30px">${(TYPES[D.y]||TYPES.otro)[0]}</div><h1>${esc(D.n)}</h1>${D.a?`<p class="sm mut">📍 ${esc(D.a)}</p>`:''}<p class="mut" style="margin-top:4px">Agenda tu cita en pocos pasos</p></div>
+ <div class="card"><h2>${n++}. Elige el servicio</h2>${D.s.map((x,i)=>`<div class="li" style="cursor:pointer" onclick="bk.s=${i};bk.d=null;bk.t=null;render()"><div><b>${bk.s===i?'✅ ':''}${esc(x[0])}</b><div class="xs mut">${x[2]} min${x[3]?' · abono '+money(x[3]):''}</div></div><b>${money(x[1])}</b></div>`).join('')}</div>
+ ${s&&X.length?`<div class="card"><h2>${n++}. ¿Algo adicional?</h2><p class="xs mut" style="margin:-4px 0 8px">Opcional. Se suma al total.</p><div class="pills">${X.map((x,i)=>`<button class="pill ${bk.x.includes(i)?'on':''}" onclick="bk.x=bk.x.includes(${i})?bk.x.filter(y=>y!==${i}):[...bk.x,${i}];bk.t=null;render()">${bk.x.includes(i)?'✓ ':'+ '}${esc(x[0])} ${money(x[1])}</button>`).join('')}</div></div>`:''}
+ ${s?`<div class="tot" style="margin-bottom:12px"><div><span class="xs mut">Total a pagar</span><b>${money(total)}</b></div><div style="text-align:right"><span class="xs mut">${dur} min</span>${dep?`<div class="xs" style="color:var(--ok);font-weight:600">Abono para separar: ${money(dep)}</div>`:''}</div></div>`:''}
+ ${s?`<div class="card"><h2>${n++}. Elige el día</h2>${okDays.length?`<div class="pills">${okDays.map(([d])=>{const dt=parse(d);return `<button class="pill ${bk.d===d?'on':''}" onclick="bk.d='${d}';bk.t=null;render()">${cap(WD[dt.getDay()])} ${dt.getDate()}</button>`}).join('')}</div>`:'<p class="mut">No hay espacios disponibles para este servicio en las próximas 2 semanas. Escríbele directamente al negocio.</p>'}</div>`:''}
+ ${sel?`<div class="card"><h2>${n++}. Elige la hora</h2><div class="pills">${starts(sel[1],dur,sel[0]).map(m=>`<button class="pill ${bk.t===m?'on':''}" onclick="bk.t=${m};render()">${h12(fromMin(m))}</button>`).join('')}</div></div>`:''}
  ${bk.t!=null&&sel?`<div class="card"><h2>Tus datos</h2><label class="f">Tu nombre</label><input id="bkn" placeholder="Nombre y apellido" value="${esc(store.get('bkName',''))}"><label class="f">Tu celular</label><input id="bkp" inputmode="tel" placeholder="300 123 4567" value="${esc(store.get('bkPhone',''))}"><div id="bke" class="err"></div>
+ <div class="tot" style="margin-top:12px"><div><span class="xs mut">${esc(s[0])}${xs.length?' + '+xs.map(x=>esc(x[0])).join(' + '):''}</span><b>${money(total)}</b></div>${dep?`<div style="text-align:right"><span class="xs mut">Abono para separar</span><b style="color:var(--ok)">${money(dep)}</b></div>`:''}</div>
  ${D.p?`<div class="banner" style="margin-top:12px">💡 ${esc(D.p)}</div>`:''}
  <button class="btn wa full" style="margin-top:12px" onclick="sendBooking()">Pedir cita por WhatsApp</button><p class="xs mut" style="text-align:center;margin-top:8px">${esc(D.n)} te confirmará la cita por WhatsApp.</p></div>`:''}
  <p class="xs mut" style="text-align:center;margin:18px 0">Espacios actualizados al ${dShort(D.g)} · Hecho con MiCita</p>`}
-function sendBooking(){const D=getBooking(),s=D.s[bk.s],n=$('#bkn').value.trim(),p=$('#bkp').value.trim();if(n.length<3){$('#bke').textContent='Escribe tu nombre.';return}
- store.set('bkName',n);store.set('bkPhone',p);const hm=fromMin(bk.t);
- const txt=`Hola ${D.n} 👋 Quiero agendar una cita:\n\n• Servicio: ${s[0]}\n• Día: ${cap(dLong(bk.d))}\n• Hora: ${h12(hm)}\n• Nombre: ${n}${p?'\n• Celular: '+p:''}\n\n¿Me confirmas? 🙏\n\n[MiCita|${bk.d}|${hm}|${s[0]}|${n}|${p}]`;
+function sendBooking(){const D=getBooking(),s=D.s[bk.s],X=D.x||[],xs=(bk.x||[]).map(i=>X[i]).filter(Boolean),n=$('#bkn').value.trim(),p=$('#bkp').value.trim();if(n.length<3){$('#bke').textContent='Escribe tu nombre.';return}
+ store.set('bkName',n);store.set('bkPhone',p);const hm=fromMin(bk.t),total=s[1]+xs.reduce((a,x)=>a+x[1],0),dep=s[3]||0;
+ const txt=`Hola ${D.n} 👋 Quiero agendar una cita:\n\n• Servicio: ${s[0]}${xs.length?'\n• Adicionales: '+xs.map(x=>x[0]).join(', '):''}\n• Total: ${money(total)}${dep?'\n• Abono para separar: '+money(dep):''}\n• Día: ${cap(dLong(bk.d))}\n• Hora: ${h12(hm)}\n• Nombre: ${n}${p?'\n• Celular: '+p:''}\n\n¿Me confirmas? 🙏\n\n[MiCita|${bk.d}|${hm}|${s[0]}|${n}|${p}|${xs.map(x=>x[0]).join(';')}]`;
  window.open('https://wa.me/'+D.w+'?text='+encodeURIComponent(txt),'_blank')}
 function pasteOrder(){modal(`<h2>📥 Pegar pedido</h2><p class="sm mut">Copia el mensaje que te llegó por WhatsApp desde tu link de reservas y pégalo aquí.</p><textarea id="po" style="min-height:140px;margin-top:10px" placeholder="Pega aquí el mensaje completo"></textarea><div id="poe" class="err"></div>
  <div class="row" style="margin-top:12px">${navigator.clipboard&&navigator.clipboard.readText?`<button class="btn grow" onclick="navigator.clipboard.readText().then(t=>{document.querySelector('#po').value=t;parseOrder()}).catch(()=>toast('Pega con el teclado'))">Pegar</button>`:''}<button class="btn pri grow" onclick="parseOrder()">Armar cita</button></div>`)}
-function parseOrder(){const t=$('#po').value;const m=t.match(/\[MiCita\|(\d{4}-\d{2}-\d{2})\|(\d{2}:\d{2})\|([^|]*)\|([^|]*)\|([^\]]*)\]/);
+function parseOrder(){const t=$('#po').value;const m=t.match(/\[MiCita\|(\d{4}-\d{2}-\d{2})\|(\d{2}:\d{2})\|([^|]*)\|([^|]*)\|([^|\]]*)(?:\|([^\]]*))?\]/);
  if(!m){$('#poe').textContent='No encontré un pedido de MiCita en ese texto. Copia el mensaje completo.';return}
- const[,date,time,sname,name,phone]=m;const s=SV.find(x=>normN(x.name)===normN(sname))||SV[0];
+ const[,date,time,sname,name,phone,xtra]=m;const s=SV.find(x=>normN(x.name)===normN(sname))||SV[0];
+ const add=(xtra||'').split(';').map(nm=>(B.addons||[]).find(x=>normN(x.name)===normN(nm))).filter(Boolean).map(x=>x.id);
  const ex=CL.find(c=>normN(c.name)===normN(name)||(phone&&phoneWA(c.phone)===phoneWA(phone)));
- overlapOK=false;draft={id:null,date,time,cid:ex?ex.id:'',sid:s?s.id:'',price:s?s.price:0,dur:s?s.dur:60,note:'Pedido por link',newName:ex?'':name,newPhone:ex?'':phone,dep:null,src:'link'};apForm()}
-
+ overlapOK=false;draft={id:null,date,time,cid:ex?ex.id:'',sid:s?s.id:'',add,price:0,dur:60,note:'Pedido por link',newName:ex?'':name,newPhone:ex?'':phone,dep:null,src:'link'};recalc();apForm()}
 /* ---------- Fotos ---------- */
 let _db=null;
 function photosDB(mode,fn){const go=db=>{try{const tx=db.transaction('ph',mode);fn(tx.objectStore('ph'),tx)}catch(e){}};if(_db)return go(_db);
