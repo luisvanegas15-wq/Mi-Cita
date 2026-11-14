@@ -140,6 +140,10 @@ nav button svg{width:21px;height:21px}
 .ag-a b{display:block;font-size:13px}.ag-a span{color:var(--mut)}
 .ag-a.done{opacity:.7}.ag-a.noshow{opacity:.45;text-decoration:line-through}
 .ag-now{position:absolute;left:56px;right:0;height:2px;background:var(--bad);z-index:3}
+.backbtn{display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--ac);font-weight:600;font-size:15px;padding:4px 6px 4px 0;margin:0 0 6px;cursor:pointer}
+#sheet{position:relative}
+.sheetx{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:0;background:var(--card2);color:var(--mut);font-size:15px;cursor:pointer;z-index:2}
+#sheet>.sheetx+h2,#sheet>.sheetx+.row,#sheet>.sheetx+div{padding-right:44px}
 </style>
 </head>
 <body>
@@ -213,7 +217,7 @@ const active=a=>a.status!=='cancel';
 const trialLeft=()=>lic&&lic.trial?Math.max(0,TRIAL-daysBetween(lic.date,iso(today()))):99;
 
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
-function modal(h){closeM();const o=document.createElement('div');o.id='ov';o.innerHTML=`<div id="sheet"><div class="grip"></div>${h}</div>`;o.addEventListener('click',e=>{if(e.target===o)closeM()});document.body.appendChild(o)}
+function modal(h){closeM();const o=document.createElement('div');o.id='ov';o.innerHTML=`<div id="sheet"><div class="grip"></div><button class="sheetx" onclick="closeM()" aria-label="Cerrar">✕</button>${h}</div>`;o.addEventListener('click',e=>{if(e.target===o)closeM()});document.body.appendChild(o)}
 function closeM(){const o=$('#ov');if(o)o.remove()}
 
 /* ---------- WhatsApp ---------- */
@@ -237,10 +241,14 @@ function render(){
  nav.innerHTML=navHTML();
  const tb=lic&&lic.trial?`<div class="banner row between"><span>🎁 Prueba gratis: <b>${trialLeft()} día${trialLeft()===1?'':'s'}</b></span><button class="btn s dark" onclick="showAct=true;render()">Activar</button></div>`:'';
  const demo=B.demo?`<div class="banner" style="background:var(--confb)"><b>Estás viendo datos de ejemplo.</b> Explora con calma. <a href="#" onclick="clearDemo();return false">Empezar con mis datos</a></div>`:'';
- $('#app').innerHTML=tb+demo+({hoy:vHoy,agenda:vAgenda,clientes:vClientes,caja:vCaja,mas:vMas}[tab])();
+ $('#app').innerHTML=tb+demo+backBar()+({hoy:vHoy,agenda:vAgenda,clientes:vClientes,caja:vCaja,mas:vMas}[tab])();
 }
-function go(t){tab=t;window.scrollTo(0,0);render()}
-
+let navStack=[];
+try{if(!location.hash.startsWith('#r=')&&!location.hash.startsWith('#p=')){history.replaceState({root:1},'');history.pushState({app:1},'')}}catch(e){}
+function go(t){if(t!==tab){navStack.push(tab);if(navStack.length>30)navStack.shift()}tab=t;window.scrollTo(0,0);render()}
+function goBack(){tab=navStack.length?navStack.pop():'hoy';window.scrollTo(0,0);render()}
+function backBar(){return tab==='hoy'?'':`<button class="backbtn" onclick="goBack()" aria-label="Volver"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Volver</button>`}
+addEventListener('popstate',()=>{const rep=()=>{try{history.pushState({app:1},'')}catch(e){}};if($('#ov')){closeM();rep();return}if(B&&tab!=='hoy'){goBack();rep()}});
 function apRow(a,opts={}){const s=svc(a.sid),c=cli(a.cid),end=fromMin(toMin(a.time)+(a.dur||s.dur)),ns=noShows(a.cid);
  let acts='';
  if(a.status==='pend'||a.status==='conf'){acts=`<button class="btn s wa" onclick="wa('rec','${a.id}')">${a.rem?'✓ Recordada':'Recordar'}</button>${a.status==='pend'?`<button class="btn s" onclick="setSt('${a.id}','conf')">Confirmó</button>`:''}<button class="btn s ok" onclick="doneAppt('${a.id}')">Atendida</button>`}
